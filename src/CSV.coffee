@@ -75,7 +75,7 @@ String.prototype.parseCSVLine = (options) ->
   line.push this.toString().substring(last_index,this.length).trim().replace('\\','')
   
   unless options.headers is true or options.headers is false or options.headers is undefined
-    line = combineToOject(options.headers,line)
+    line = combineToObject(options.headers,line)
     
   # trigger the callback
   options.onresult(line) if options.onresult
@@ -89,7 +89,7 @@ String.prototype.parseMultiLineCSV = (options) ->
   options.delimiter    ?= String.CSV_DELIMITER_COMMA
   options.fill_empty   ?= true
   options.headers      ?= false
-  options.lowercase_headers      ?= false
+  options.lowercase_headers ?= false
   
   options.onprogress   ?= ()->null
   options.onerror      ?= ()->null
@@ -102,23 +102,22 @@ String.prototype.parseMultiLineCSV = (options) ->
     options.onerror
     return null
   
-  pattern = /(.*)\s*[\r\n]+\s*/g
+  pattern = /(.*)\s*[\r\n]\s*/g
+  pattern = /[\r\n]?\s*(.+)\s*[\r\n]?/g
   lines   = []
   
-  # walk over water:
-  while line = pattern.exec this.toString()
-    _line = line[1].parseCSVLine(options)
-    
+  for line in @.match(pattern)
+    _line = line.parseCSVLine(options)
     ###
       TODO Handle the fill option properly
     ###
-    
-    if _line and options.json and options.headers is true
-      options.headers = _line.map (l)=> return l.saneParam()
-      continue
-    else 
-      lines.push _line unless !_line
-      options.onprogress _line unless !_line
+    if _line
+      if options.headers is true
+        options.headers = _line.map (l)=> return l.saneParam()
+        continue
+      else 
+        lines.push _line
+        options.onprogress _line
   
   # trigger the complete handler  
   options.oncomplete lines
@@ -141,7 +140,7 @@ String.prototype.csvToJson = (options) ->
 # ====================
 # = Helper Functions =
 # ====================
-combineToOject = (keys,values) ->
+window.combineToObject = (keys,values) ->
   keys = keys.filter (k) => return k? and k isnt ""
   o = {}
   o[key] = values[i] for key,i in keys
