@@ -18,7 +18,7 @@ runCommand = (name, args...) ->
 # = Constants =
 # =============
 NAME = "CSV"
-BUILD_PATH = "build/"
+RELESE_PATH = "release/"
 
 # ============
 # = Watchers =
@@ -33,4 +33,9 @@ task 'src:watch', 'Watch source files and compile to build', (options) ->
 # = Pack it! =
 # ============
 task 'pack', 'Pack eveting in a single file', (options)->
-  exec 'mkdir -p build && uglifyjs lib/'+NAME+'.js > '+BUILD_PATH+NAME+'.min.js'
+  invoke "clean",options
+  runCommand 'coffee', '-o', 'lib', '-bc', 'src'
+  exec 'mkdir -p '+RELESE_PATH+' && uglifyjs lib/'+NAME+'.js > '+RELESE_PATH+NAME+'.min.js'
+
+task "clean","clean up packing stuff", (options)->
+  exec "rm -rdf "+RELESE_PATH
