@@ -17,22 +17,8 @@ runCommand = (name, args...) ->
 # =============
 # = Constants =
 # =============
-
 NAME = "CSV"
 BUILD_PATH = "build/"
-COMBINED = 'build/combined.js'
-MAIN_FILE = 'lib/main.js'
-
-TARGETS = 
-  debug:
-    name: NAME+'.debug'
-  release:
-    name: NAME
-
-SPROCKET_INCLUDES = ("-I "+path for path in [
-  'vendor'
-  'vendor/js'
-  ])
 
 # ============
 # = Watchers =
@@ -42,3 +28,9 @@ task 'test:watch', 'Watch specs and build them', (options) ->
 
 task 'src:watch', 'Watch source files and compile to build', (options) ->
   runCommand 'coffee', '-o', 'lib', '-wc', 'src'
+
+# ============
+# = Pack it! =
+# ============
+task 'pack', 'Pack eveting in a single file', (options)->
+  exec 'mkdir -p build && uglifyjs lib/'+NAME+'.js > '+BUILD_PATH+NAME+'.min.js'
