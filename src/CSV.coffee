@@ -1,5 +1,6 @@
 ###
 CSV.js - A Basic CSV Parser for javascript
+------------------------------------------
 
 v0.1 -- https://github.com/jens-a-e/CSV.js
 
@@ -8,9 +9,9 @@ CSV formatted. I have not been satisfied with the different parsers i could
 find. So here is my bit to it.
 
 Early release, so keep watching and report any issues :)
-
 Written in coffee script to keep things nice an tidy.
 
+*****
 Licensed under BSD License:
 
 Copyright (c) 2011, jens alexander ewald, jens@ififelse.net
