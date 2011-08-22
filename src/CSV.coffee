@@ -11,93 +11,71 @@ String.prototype.parseCSVLine = (delimiter,comment_char,onresult) ->
   comment_char ?= "#"
   delimiter    ?= ","
   onresult     ?= null
+  oncomment    ?= null
   
   # return null, if line is a comment line
-  return null if this.charAt(0) is "#"
+  if this.charAt(0) is "#"
+    oncomment(this.shift()) if oncomment
+    return null
   
-  delimiter ?= ","
-  # line       = this.split delimiter
+  # pattern = new RegExp "([^'\"\\\\]|,?),(?=[^\\1]|$)","gm"
+  pattern = new RegExp "([^'\"\\\\]|"+delimiter+"?)"+delimiter+"(?=[^\\1]|$)","gm"
   
-  
-  ###
-  # check for splits performed inside quoted strings and correct if needed
-  for i in [0..line.length]
-    chunk = line[i].replace /^[\s]*|[\s]*$/g, "" # trim the line
-    quote = "";
-    
-    quote = chunk.charAt(0) if chunk.charAt(0) is '"' or chunk.charAt(0) is "'"
-    quote = "" if quote isnt "" and chunk.charAt(chunk.length - 1) is quote
-    
-    if quote != ""
-      j = i + 1
-      chunk = line[j].replace /^[\s]*|[\s]*$/g, "" if j < line.length
-      
-      while j < line.length and chunk.charAt(chunk.length - 1) isnt quote
-        line[i] += ',' + line[j]
-        line.splice(j, 1)
-        chunk = line[j].replace(/[\s]*$/g, "")
-      
-      if j < line.length
-        line[i] += ',' + line[j]
-        line.splice j, 1
-    
-    i++
-  
-  for i in [0..line.length]
-    # remove leading/trailing whitespace
-    line[i] = line[i].replace /^[\s]*|[\s]*$/g, ""
-    # remove leading/trailing quotes
-    if line[i].charAt(0) is '"'
-      line[i] = line[i].replace /^"|"$/g, ""
-    else if line[i].charAt(0) is "'"
-      line[i] = line[i].replace /^'|'$/g, ""
-  ###
-  
-  pattern = new RegExp "(?:[^'\"\\\\]),(?=[^\\1]|$)","gm"
+  console.log pattern
   line = []
   last_index = 0
   while result = pattern.exec this.toString()
-    index = (result[0].search ',')+result.index
+    index = (result[0].search delimiter)+result.index
     line.push this.toString().substring(last_index,index).trim().replace('\\','')
     last_index = index+1
+  # get the last result too
   line.push this.toString().substring(last_index,this.length).trim().replace('\\','')
   
   # trigger the callback
   onresult(line) if onresult
   
   return line
-  
-# 
-# String.prototype.saneParam = function(tolower) {
-#   var sane = this.replace(/^\s+/, '').
-#         replace (/ä+/, 'ae').
-#         replace (/ö+/, 'oe').
-#         replace (/ü+/, 'ue').
-#         replace (/Ä+/, 'Ae').
-#         replace (/Ö+/, 'Oe').
-#         replace (/Ü+/, 'Ue').
-#         replace (/ß+/, 'ss').
-#         replace (/\s+$/, '_').
-#         replace(/[^A-z0-9]+/gi,'');
-#     return tolower ? sane.toLowerCase():sane;
-# }
+
+
+String.prototype.saneParam = (tolower) ->
+  sane = this.replace(/^\s+/, '').
+  replace(/ä+/,   'ae').
+  replace(/ö+/,   'oe').
+  replace(/ü+/,   'ue').
+  replace(/Ä+/,   'Ae').
+  replace(/Ö+/,   'Oe').
+  replace(/Ü+/,   'Ue').
+  replace(/ß+/,   'ss').
+  replace(/\s+/, '_').
+  replace(/[^A-z0-9]+/gi,'_').
+  replace(/_+/, '_').
+  replace(/_$/, '')
+  sane = sane.toLowerCase() if tolower
+  return sane
+
+
 # 
 # 
 # String.prototype.csvToJson = function (options) {
-#   var delimiter    = options['delimiter']    || ",";
-#   var comment_char = options['comment_char'] || "#";
-#   var fill_empty   = options['fill_empty']   || true;
-#   var onprogress   = options['onprogress']   || undefined;
-#   var onerror      = options['onerror']      || undefined;
-#   var oncomplete   = options['oncomplete']   || undefined;
-#   var headers      = options['headers']      || undefined;
-#   
-#   var csvRows = [];
-#   var objArr = [];
-#   var error = false;
-#   var csvText = this;
-#   var jsonText = "";
-# 
+String.prototype.csvToJson = (options) ->
+  comment_char ?= "#"
+  delimiter    ?= ","
+  onlineresult ?= undefined
+  oncomment    ?= undefined
+  onresult     ?= undefined
+  
+  fill_empty   = options['fill_empty']   || true;
+  onprogress   = options['onprogress']   || undefined;
+  onerror      = options['onerror']      || undefined;
+  oncomplete   = options['oncomplete']   || undefined;
+  headers      = options['headers']      || undefined;
+
+  csvRows = [];
+  objArr = [];
+  error = false;
+  csvText = this;
+  jsonText = "";
+  
 #   if (csvText == "") {
 #     error = true;
 #     jsonText=this;
