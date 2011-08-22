@@ -4,6 +4,9 @@ find. So here is my bit to it.
 
 **!! There may still be changes in the API !!**
 
+**If you want to use it straight away, download the minified version [here](https://raw.github.com/jens-a-e/CSV.js/master/release/CSV.min.js)**
+
+
 Use it the following way:
 
 ```
